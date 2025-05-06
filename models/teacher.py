@@ -65,6 +65,36 @@ class Teacher:
         print(f"📛 Name: {self.name}")
         print(f"📚 Subject: {self.subject}")
 
+    @staticmethod
+    def get_all():
+        conn = sqlite3.connect("school.db")
+        c = conn.cursor()
+        c.execute("SELECT * FROM teachers ORDER BY name ASC")
+        teachers = [Teacher(*row) for row in c.fetchall()]
+        conn.close()
+        return teachers
+
+    @staticmethod
+    def get_by_subject(subject):
+        conn = sqlite3.connect("school.db")
+        c = conn.cursor()
+        c.execute("SELECT * FROM teachers WHERE subject = ?", (subject,))
+        teachers = [Teacher(*row) for row in c.fetchall()]
+        conn.close()
+        return teachers
+
+    @staticmethod
+    def search_by_subject(query):
+        conn = sqlite3.connect("school.db")
+        c = conn.cursor()
+        c.execute("SELECT * FROM teachers WHERE subject LIKE ?", (f"%{query}%", ))
+        teachers = [Teacher(*row) for row in c.fetchall()]
+        conn.close()
+        return teachers
+
+    
+
+
 
 
 

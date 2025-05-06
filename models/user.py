@@ -80,6 +80,15 @@ class User:
         print(f"🛡️ Role: {self.role}")
         print(f"🧷 Linked ID: {self.linked_id}")
 
+    @staticmethod
+    def get_all():
+        conn = sqlite3.connect("school.db")
+        c = conn.cursor()
+        c.execute("SELECT * FROM users ORDER BY username ASC")
+        users = [User(*row) for row in c.fetchall()]
+        conn.close()
+        return users
+
 
 
 
