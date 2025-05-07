@@ -1,4 +1,5 @@
 import sqlite3
+from utils.app_constants import AppConstants
 
 class Grade:
     def __init__(self, id, student_id, subject, score):
@@ -9,10 +10,10 @@ class Grade:
 
     @staticmethod
     def create_table():
-        conn = sqlite3.connect("school.db")
+        conn = sqlite3.connect(AppConstants.DB_NAME)
         c = conn.cursor()
-        c.execute("""
-            CREATE TABLE IF NOT EXISTS grades (
+        c.execute(f"""
+            CREATE TABLE IF NOT EXISTS {AppConstants.TABLE_GRADES} (
                 id INTEGER PRIMARY KEY,
                 student_id INTEGER,
                 subject TEXT,
@@ -23,18 +24,18 @@ class Grade:
         conn.close()
 
     def save(self):
-        conn = sqlite3.connect("school.db")
+        conn = sqlite3.connect(AppConstants.DB_NAME)
         c = conn.cursor()
-        c.execute("INSERT INTO grades (id, student_id, subject, score) VALUES (?, ?, ?, ?)",
+        c.execute(f"INSERT INTO {AppConstants.TABLE_GRADES} (id, student_id, subject, score) VALUES (?, ?, ?, ?)",
                   (self.id, self.student_id, self.subject, self.score))
         conn.commit()
         conn.close()
 
     def update(self):
-        conn = sqlite3.connect("school.db")
+        conn = sqlite3.connect(AppConstants.DB_NAME)
         c = conn.cursor()
-        c.execute("""
-            UPDATE grades
+        c.execute(f"""
+            UPDATE {AppConstants.TABLE_GRADES}
             SET student_id = ?, subject = ?, score = ?
             WHERE id = ?
         """, (self.student_id, self.subject, self.score, self.id))
@@ -43,9 +44,9 @@ class Grade:
 
     @staticmethod
     def get_by_id(grade_id):
-        conn = sqlite3.connect("school.db")
+        conn = sqlite3.connect(AppConstants.DB_NAME)
         c = conn.cursor()
-        c.execute("SELECT * FROM grades WHERE id = ?", (grade_id,))
+        c.execute(f"SELECT * FROM {AppConstants.TABLE_GRADES} WHERE id = ?", (grade_id,))
         row = c.fetchone()
         conn.close()
         if row:
@@ -53,9 +54,9 @@ class Grade:
         return None
 
     def delete(self):
-        conn = sqlite3.connect("school.db")
+        conn = sqlite3.connect(AppConstants.DB_NAME)
         c = conn.cursor()
-        c.execute("DELETE FROM grades WHERE id = ?", (self.id,))
+        c.execute(f"DELETE FROM {AppConstants.TABLE_GRADES} WHERE id = ?", (self.id,))
         conn.commit()
         conn.close()
 

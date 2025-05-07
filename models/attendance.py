@@ -1,4 +1,5 @@
 import sqlite3
+from utils.app_constants import AppConstants
 
 class Attendance:
     def __init__(self, id, student_id, date, status):
@@ -9,10 +10,10 @@ class Attendance:
 
     @staticmethod
     def create_table():
-        conn = sqlite3.connect("school.db")
+        conn = sqlite3.connect(AppConstants.DB_NAME)
         c = conn.cursor()
-        c.execute("""
-            CREATE TABLE IF NOT EXISTS attendance (
+        c.execute(f"""
+            CREATE TABLE IF NOT EXISTS {AppConstants.TABLE_ATTENDANCE} (
                 id INTEGER PRIMARY KEY,
                 student_id INTEGER,
                 date TEXT,
@@ -23,18 +24,20 @@ class Attendance:
         conn.close()
 
     def save(self):
-        conn = sqlite3.connect("school.db")
+        conn = sqlite3.connect(AppConstants.DB_NAME)
         c = conn.cursor()
-        c.execute("INSERT INTO attendance (id, student_id, date, status) VALUES (?, ?, ?, ?)",
-                  (self.id, self.student_id, self.date, self.status))
+        c.execute(f"""
+            INSERT INTO {AppConstants.TABLE_ATTENDANCE} (id, student_id, date, status)
+            VALUES (?, ?, ?, ?)
+        """, (self.id, self.student_id, self.date, self.status))
         conn.commit()
         conn.close()
 
     def update(self):
-        conn = sqlite3.connect("school.db")
+        conn = sqlite3.connect(AppConstants.DB_NAME)
         c = conn.cursor()
-        c.execute("""
-            UPDATE attendance
+        c.execute(f"""
+            UPDATE {AppConstants.TABLE_ATTENDANCE}
             SET student_id = ?, date = ?, status = ?
             WHERE id = ?
         """, (self.student_id, self.date, self.status, self.id))
@@ -43,9 +46,9 @@ class Attendance:
 
     @staticmethod
     def get_by_id(attendance_id):
-        conn = sqlite3.connect("school.db")
+        conn = sqlite3.connect(AppConstants.DB_NAME)
         c = conn.cursor()
-        c.execute("SELECT * FROM attendance WHERE id = ?", (attendance_id,))
+        c.execute(f"SELECT * FROM {AppConstants.TABLE_ATTENDANCE} WHERE id = ?", (attendance_id,))
         row = c.fetchone()
         conn.close()
         if row:
@@ -53,9 +56,9 @@ class Attendance:
         return None
 
     def delete(self):
-        conn = sqlite3.connect("school.db")
+        conn = sqlite3.connect(AppConstants.DB_NAME)
         c = conn.cursor()
-        c.execute("DELETE FROM attendance WHERE id = ?", (self.id,))
+        c.execute(f"DELETE FROM {AppConstants.TABLE_ATTENDANCE} WHERE id = ?", (self.id,))
         conn.commit()
         conn.close()
 

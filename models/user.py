@@ -1,7 +1,8 @@
 import sqlite3
+from utils.app_constants import AppConstants
 
 class User:
-    def __init__(self, id, username, password, role, linked_id):
+    def __init__(self, username, password, role, linked_id, id=None):
         self.id = id
         self.username = username
         self.password = password
@@ -13,11 +14,11 @@ class User:
 
     @staticmethod
     def create_table():
-        conn = sqlite3.connect("school.db")
+        conn = sqlite3.connect(AppConstants.DB_NAME)
         c = conn.cursor()
-        c.execute("""
-            CREATE TABLE IF NOT EXISTS users (
-                id INTEGER PRIMARY KEY,
+        c.execute(f"""
+            CREATE TABLE IF NOT EXISTS {AppConstants.TABLE_USERS} (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
                 username TEXT,
                 password TEXT,
                 role TEXT,
@@ -28,18 +29,21 @@ class User:
         conn.close()
 
     def save(self):
-        conn = sqlite3.connect("school.db")
+        conn = sqlite3.connect(AppConstants.DB_NAME)
         c = conn.cursor()
-        c.execute("INSERT INTO users (id, username, password, role, linked_id) VALUES (?, ?, ?, ?, ?)",
-                  (self.id, self.username, self.password, self.role, self.linked_id))
+        c.execute(f"""
+            INSERT INTO {AppConstants.TABLE_USERS} (username, password, role, linked_id)
+            VALUES (?, ?, ?, ?)
+        """, (self.username, self.password, self.role, self.linked_id))
+        self.id = c.lastrowid  # Capture auto-generated ID
         conn.commit()
         conn.close()
 
     def update(self):
-        conn = sqlite3.connect("school.db")
+        conn = sqlite3.connect(AppConstants.DB_NAME)
         c = conn.cursor()
-        c.execute("""
-            UPDATE users
+        c.execute(f"""
+            UPDATE {AppConstants.TABLE_USERS}
             SET username = ?, password = ?, role = ?, linked_id = ?
             WHERE id = ?
         """, (self.username, self.password, self.role, self.linked_id, self.id))
@@ -48,30 +52,31 @@ class User:
 
     @staticmethod
     def get_by_id(user_id):
-        conn = sqlite3.connect("school.db")
+        conn = sqlite3.connect(AppConstants.DB_NAME)
         c = conn.cursor()
-        c.execute("SELECT * FROM users WHERE id = ?", (user_id,))
+        c.execute(f"SELECT * FROM {AppConstants.TABLE_USERS} WHERE id = ?", (user_id,))
         row = c.fetchone()
         conn.close()
         if row:
-            return User(*row)
+            return User(row[1], row[2], row[3], row[4], row[0])  # Reordered for constructor
         return None
 
     def delete(self):
-        conn = sqlite3.connect("school.db")
+        conn = sqlite3.connect(AppConstants.DB_NAME)
         c = conn.cursor()
-        c.execute("DELETE FROM users WHERE id = ?", (self.id,))
+        c.execute(f"DELETE FROM {AppConstants.TABLE_USERS} WHERE id = ?", (self.id,))
         conn.commit()
         conn.close()
 
     @staticmethod
     def login(username, password):
-        conn = sqlite3.connect("school.db")
+        conn = sqlite3.connect(AppConstants.DB_NAME)
         c = conn.cursor()
-        c.execute("SELECT * FROM users WHERE username = ? AND password = ?", (username, password))
+        c.execute(f"SELECT * FROM {AppConstants.TABLE_USERS} WHERE username = ? AND password = ?", (username, password))
         row = c.fetchone()
+        conn.close()
         if row:
-            return User(*row)
+            return User(row[1], row[2], row[3], row[4], row[0])
         return None
 
     def print_info(self):
@@ -82,27 +87,9 @@ class User:
 
     @staticmethod
     def get_all():
-        conn = sqlite3.connect("school.db")
+        conn = sqlite3.connect(AppConstants.DB_NAME)
         c = conn.cursor()
-        c.execute("SELECT * FROM users ORDER BY username ASC")
-        users = [User(*row) for row in c.fetchall()]
+        c.execute(f"SELECT * FROM {AppConstants.TABLE_USERS} ORDER BY username ASC")
+        users = [User(row[1], row[2], row[3], row[4], row[0]) for row in c.fetchall()]
         conn.close()
         return users
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
